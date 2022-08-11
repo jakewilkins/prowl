@@ -1,5 +1,5 @@
 #[derive(Debug)]
-struct Notification {
+pub struct Notification {
     api_keys: Vec<String>,
     priority: Option<Priority>,
     url: Option<String>, // max 512
@@ -9,7 +9,7 @@ struct Notification {
 }
 
 #[derive(Debug)]
-enum Priority {
+pub enum Priority {
     VeryLow,
     Moderate,
     Normal,
@@ -18,13 +18,13 @@ enum Priority {
 }
 
 #[derive(Debug)]
-enum AddError {
+pub enum AddError {
     ApiError(reqwest::Response),
     SendError(reqwest::Error),
 }
 
 #[derive(Debug)]
-enum CreationError {
+pub enum CreationError {
     InvalidUrlLength(usize),
     ApplicationLength(usize),
     EventLength(usize),
