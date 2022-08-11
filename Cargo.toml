@@ -1,0 +1,15 @@
+[package]
+name = "prowl"
+version = "0.1.0"
+edition = "2021"
+authors = ["Myles Empty Best"]
+license = "MIT OR Apache-2.0"
+keywords = ["prowl", "notifications"]
+description = "Send prowl notifications. See https://www.prowlapp.com"
+homepage = "https://github.com/TheEmpty/prowl"
+repository = "https://github.com/TheEmpty/prowl"
+
+[dependencies]
+urlencoding = "2.1"
+log = "0.4.0"
+reqwest = "0.11.11"
