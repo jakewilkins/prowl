@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 #[derive(Debug)]
 pub struct Notification {
     api_keys: Vec<String>,
@@ -19,8 +21,9 @@ pub enum Priority {
 
 #[derive(Debug)]
 pub enum AddError {
-    ApiError(reqwest::Response),
-    SendError(reqwest::Error),
+    Api(reqwest::Response),
+    Send(reqwest::Error),
+    Format(std::fmt::Error),
 }
 
 #[derive(Debug)]
@@ -32,7 +35,7 @@ pub enum CreationError {
 }
 
 impl Priority {
-    fn to_i8(self) -> i8 {
+    fn as_i8(&self) -> i8 {
         match self {
             Priority::VeryLow => -2,
             Priority::Moderate => -1,
@@ -80,35 +83,47 @@ impl Notification {
         })
     }
 
-    pub async fn add(self) -> Result<(), AddError> {
+    pub async fn add(&self) -> Result<(), AddError> {
         let safe_application = urlencoding::encode(&self.application);
         let safe_event = urlencoding::encode(&self.event);
         let safe_description = urlencoding::encode(&self.description);
 
         let mut url: String = "https://prowl.weks.net/publicapi/add".to_string();
-        url.push_str(&format!("?apikey={}", self.api_keys.join(",")));
-        url.push_str(&format!("&application={}", safe_application));
-        url.push_str(&format!("&event={}", safe_event));
-        url.push_str(&format!("&description={}", safe_description));
+        write!(url, "?apikey={}", self.api_keys.join(","))?;
+        write!(url, "&application={}", safe_application)?;
+        write!(url, "&event={}", safe_event)?;
+        write!(url, "&description={}", safe_description)?;
 
-        if let Some(notification_url) = self.url {
-            let safe_notification_url = urlencoding::encode(&notification_url);
-            url.push_str(&format!("&url={}", safe_notification_url));
+        if let Some(notification_url) = &self.url {
+            let safe_notification_url = urlencoding::encode(notification_url);
+            write!(url, "&url={}", safe_notification_url)?;
         }
 
-        if let Some(priority) = self.priority {
-            url.push_str(&format!("&priority={}", priority.to_i8()));
+        if let Some(priority) = &self.priority {
+            write!(url, "&priority={}", priority.as_i8())?;
         }
 
         log::trace!("Built URL {}", url);
 
         let client = reqwest::Client::new();
-        let res = client.post(url).send().await.map_err(AddError::SendError)?;
+        let res = client.post(url).send().await?;
         if res.status() != reqwest::StatusCode::OK {
             log::error!("Failed to add notification, {:?}", res);
-            Err(AddError::ApiError(res))
+            Err(AddError::Api(res))
         } else {
             Ok(())
         }
+    }
+}
+
+impl From<std::fmt::Error> for AddError {
+    fn from(error: std::fmt::Error) -> Self {
+        AddError::Format(error)
+    }
+}
+
+impl From<reqwest::Error> for AddError {
+    fn from(error: reqwest::Error) -> Self {
+        AddError::Send(error)
     }
 }
