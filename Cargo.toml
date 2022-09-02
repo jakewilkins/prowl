@@ -1,6 +1,6 @@
 [package]
 name = "prowl"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Myles Empty Best"]
 license = "MIT OR Apache-2.0"
@@ -13,6 +13,7 @@ repository = "https://github.com/TheEmpty/prowl"
 urlencoding = "2.1"
 log = "0.4.0"
 reqwest = "0.11.11"
+thiserror = "1.0.33"
 
 [dev-dependencies]
 tokio = { version = "1.20.1", features = ["full"] }

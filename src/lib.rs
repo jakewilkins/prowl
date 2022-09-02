@@ -1,13 +1,19 @@
 use std::fmt::Write;
+use thiserror::Error;
+
+const MAX_URL_LEN: usize = 512;
+const MAX_APP_LEN: usize = 256;
+const MAX_EVENT_LEN: usize = 1024;
+const MAX_DESC_LEN: usize = 10000;
 
 #[derive(Debug)]
 pub struct Notification {
     api_keys: Vec<String>,
     priority: Option<Priority>,
-    url: Option<String>, // max 512
-    application: String, // max 256
-    event: String,       // max 1024
-    description: String, // max 10000
+    url: Option<String>,
+    application: String,
+    event: String,
+    description: String,
 }
 
 #[derive(Debug)]
@@ -19,18 +25,25 @@ pub enum Priority {
     Emergency,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum AddError {
+    #[error("The prowl API did not accept the request.")]
     Api(reqwest::Response),
+    #[error("Failed to send notification to the prowl API. {0}")]
     Send(reqwest::Error),
+    #[error("Failed to use format macro to build URL. {0}")]
     Format(std::fmt::Error),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum CreationError {
+    #[error("Max URL length is {MAX_URL_LEN}, but provided {0}.")]
     InvalidUrlLength(usize),
+    #[error("Max application length is {MAX_APP_LEN}, but provided {0}.")]
     ApplicationLength(usize),
+    #[error("Max event length is {MAX_EVENT_LEN}, but provided {0}.")]
     EventLength(usize),
+    #[error("Max description length is {MAX_DESC_LEN}, but provided {0}.")]
     DescriptionLength(usize),
 }
 
@@ -50,25 +63,25 @@ impl Notification {
     pub fn new(
         api_keys: Vec<String>,
         priority: Option<Priority>,
-        url: Option<String>, // max 512
-        application: String, // max 256
-        event: String,       // max 1024
-        description: String, // max 10000
+        url: Option<String>,
+        application: String,
+        event: String,
+        description: String,
     ) -> Result<Self, CreationError> {
-        if application.len() > 256 {
+        if application.len() > MAX_APP_LEN {
             return Err(CreationError::ApplicationLength(application.len()));
         }
 
-        if event.len() > 1024 {
+        if event.len() > MAX_EVENT_LEN {
             return Err(CreationError::EventLength(event.len()));
         }
 
-        if description.len() > 10000 {
+        if description.len() > MAX_DESC_LEN {
             return Err(CreationError::DescriptionLength(description.len()));
         }
 
         if let Some(ref url) = url {
-            if url.len() > 512 {
+            if url.len() > MAX_URL_LEN {
                 return Err(CreationError::InvalidUrlLength(url.len()));
             }
         }
@@ -90,13 +103,13 @@ impl Notification {
 
         let mut url: String = "https://prowl.weks.net/publicapi/add".to_string();
         write!(url, "?apikey={}", self.api_keys.join(","))?;
-        write!(url, "&application={}", safe_application)?;
-        write!(url, "&event={}", safe_event)?;
-        write!(url, "&description={}", safe_description)?;
+        write!(url, "&application={safe_application}")?;
+        write!(url, "&event={safe_event}")?;
+        write!(url, "&description={safe_description}")?;
 
         if let Some(notification_url) = &self.url {
             let safe_notification_url = urlencoding::encode(notification_url);
-            write!(url, "&url={}", safe_notification_url)?;
+            write!(url, "&url={safe_notification_url}")?;
         }
 
         if let Some(priority) = &self.priority {

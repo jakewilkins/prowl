@@ -14,7 +14,7 @@ async fn main() {
     let notification_description = format!("The automated system has detected low ice cube count. Please order or make more! The reciepe is as follows:\n\n{ice_cube_reciepe}");
 
     let notification = prowl::Notification::new(
-        vec!["REPLACE-ME-WITH-YOUR-PROWL-API-KEY".to_string()],
+        vec![env!("PROWL_API_KEY").to_string()],
         Some(prowl::Priority::VeryLow),
         Some("https://www.food.com/recipe/ice-cubes-420398".to_string()),
         "My Rust Sample".to_string(),
