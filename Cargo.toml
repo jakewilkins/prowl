@@ -1,9 +1,9 @@
 [package]
 name = "prowl"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Myles Empty Best"]
-license = "MIT OR Apache-2.0"
+license = "MIT" # URL Encoding and Tokio are MIT only.
 keywords = ["prowl", "notifications"]
 description = "Send prowl notifications. See https://www.prowlapp.com"
 homepage = "https://github.com/TheEmpty/prowl"
