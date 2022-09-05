@@ -21,7 +21,8 @@ pub struct Notification {
 
 /// The Priority of the notification. Allows prowl clients to
 /// treat the notification differently.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Priority {
     VeryLow,
     Moderate,
