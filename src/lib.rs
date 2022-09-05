@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use std::fmt::Write;
 use thiserror::Error;
 
@@ -7,8 +8,9 @@ const MAX_EVENT_LEN: usize = 1024;
 const MAX_DESC_LEN: usize = 10000;
 
 /// Creates a notification in memory to be sent via prowl.
-#[derive(Debug)]
+#[derive(Debug, Getters)]
 pub struct Notification {
+    #[getter(skip)]
     api_keys: Vec<String>,
     priority: Option<Priority>,
     url: Option<String>,
