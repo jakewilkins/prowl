@@ -21,7 +21,7 @@ pub struct Notification {
 
 /// The Priority of the notification. Allows prowl clients to
 /// treat the notification differently.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Priority {
     VeryLow,
     Moderate,
