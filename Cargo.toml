@@ -12,7 +12,7 @@ repository = "https://github.com/TheEmpty/prowl"
 [dependencies]
 urlencoding = "2.1"
 log = "0.4.0"
-reqwest = "0.11.11"
+reqwest = { version = "0.11.11", features = ["blocking"] }
 thiserror = "1.0.33"
 derive-getters = "0.2.0"
 serde = { version = "1.0", features = ["derive"], optional = true }
