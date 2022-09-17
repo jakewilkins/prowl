@@ -36,7 +36,7 @@ pub enum Priority {
 pub enum AddError {
     /// When the response code from the Prowl API is not 200.
     #[error("The prowl API did not accept the request.")]
-    Api(reqwest::Response),
+    Api(reqwest::blocking::Response),
     /// When reqwest encounters an error sending the request.
     #[error("Failed to send notification to the prowl API. {0}")]
     Send(reqwest::Error),
@@ -151,7 +151,7 @@ impl Notification {
     /// notification.add()?;
     /// ```
     ///
-    pub async fn add(&self) -> Result<(), AddError> {
+    pub fn add(&self) -> Result<(), AddError> {
         let safe_application = urlencoding::encode(&self.application);
         let safe_event = urlencoding::encode(&self.event);
         let safe_description = urlencoding::encode(&self.description);
@@ -173,8 +173,8 @@ impl Notification {
 
         log::trace!("Built URL {}", url);
 
-        let client = reqwest::Client::new();
-        let res = client.post(url).send().await?;
+        let client = reqwest::blocking::Client::new();
+        let res = client.post(url).send()?;
         if res.status() != reqwest::StatusCode::OK {
             log::error!("Failed to add notification, {:?}", res);
             Err(AddError::Api(res))
